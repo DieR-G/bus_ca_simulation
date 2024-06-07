@@ -3,6 +3,7 @@ from passenger_generator import generate_passengers_test
 import datetime
 import itertools
 import numpy as np
+import data_loader
 
 STATION_NUMBER = 15
 MAX_TIME_SIMULATED = 10000
@@ -13,12 +14,10 @@ time_history = []
 
 import json
 
-with open('data/coordinates.json', 'r') as file:
-    coordinates = json.load(file)
-
-with open('data/network.json', 'r') as file:
-    network = json.load(file)
-
+coordinates = data_loader.load_coordinates()
+network = data_loader.load_network()
+    
+### visualization related things
 def interpolate_coordinates(start, end, num_points):
     lon_values = np.linspace(start[0], end[0], num_points + 1)
     lat_values = np.linspace(start[1], end[1], num_points + 1)
@@ -29,6 +28,8 @@ arc_coordinates = {
     for i, connections in enumerate(network)
     for j, weight in connections
 }
+######
+
 
 arc_positions = {
     (i, j): [False]*weight*60
@@ -116,11 +117,6 @@ def simulate(network_frequencies, network_routes, CAP):
     print(t_e-t_s)
     
 CAP = 50
-""" network_frequencies = [1000]
-network_routes = [
-    [0,1,2,5,7,9,10,12]
-]
-simulation_time = 600 """
 
 network_routes = [[0,1,2,5,7,9,10,12], [4,3,5,7,14,6], [11,3,5,14,8],[9,13,12]]
 network_frequencies = [68.2, 19.900000000000002, 15.210936746793037, 5.446410882717701] 

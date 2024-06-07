@@ -1,9 +1,8 @@
 from bus_factory import BusFactory
 import math
-import json
+import data_loader
 
-with open('data/network.json', 'r') as file:
-    network = json.load(file)
+network = data_loader.load_network()
 
 def generate_buses(routes, frequencies, capacity):
     buses = [[] for _ in range(len(routes))]

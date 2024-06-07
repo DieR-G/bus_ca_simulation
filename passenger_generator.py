@@ -1,9 +1,8 @@
 from route_assignation import get_travel_routes
-import json
+import data_loader
 import math
 
-with open('data/demand_matrix.json', 'r') as file:
-    demand_matrix = json.load(file)
+demand_matrix = data_loader.load_demand_matrix()
 
 start_time_matrix = []
 
