@@ -38,9 +38,9 @@ class Bus:
         """
         return f"Bus {self.id} at: {self.position}, capacity: {self.capacity}"
 
-    def move(self):
+    def _move(self):
         """
-        Move the bus one position in its current direction
+        Move the bus one position in its current direction on the network
         """
         self.previous_state = {
             "position": self.position,
@@ -57,6 +57,25 @@ class Bus:
             self._update_position()
         else:
             self.state = "on_road"
+
+    def move(self, arc_positions, stations, passengers, time):
+        arc = self.get_arc()
+        alighted_passengers, transfered_passengers, new_passengers = 0, 0, 0
+        if self.stop_time > 0:
+            self.stop_time -= 1
+            return alighted_passengers, transfered_passengers, new_passengers
+        arc_positions[arc][self.get_arc_position()] = False
+        self._move()
+        if arc_positions[self.get_arc()][self.get_arc_position()]:
+            self.undo_move()
+            arc_positions[self.get_arc()][self.get_arc_position()] = True
+            return alighted_passengers, transfered_passengers, new_passengers
+        arc_positions[self.get_arc()][self.get_arc_position()] = True
+        if self.state == 'on_station':
+            self.stop_time = 0
+            alighted_passengers, transfered_passengers = self.alight_passengers(stations, passengers)
+            new_passengers = self.board_passengers(stations, time)   
+        return alighted_passengers, transfered_passengers, new_passengers
 
     def undo_move(self):
         if self.previous_state:
@@ -204,3 +223,46 @@ class Bus:
         else:
             self.state = "on_road"
         self.position = t if self.direction > 0 else 2 * self.total_time - t
+
+    def alight_passengers(self, stations, passengers):
+        """
+        Processes the alighting of passengers
+
+        ### Parameters:
+        - `stations` (list): A list of list, where each sub list stores the passengers on that stations
+        - `passengers` (list): Global list of passengers
+        """
+        passenger_number, transfer_num = 0, 0
+        for passenger in self.stations_map[self.current_node]:
+            passenger.current_bus = "-1"
+            passenger.current_station = passenger.path[passenger.path_pos]
+            passenger.path_pos -= 1
+            if passenger.path_pos < 0:
+                passengers.remove(passenger)
+                continue
+            stations[passenger.current_station].add(passenger)
+            transfer_num += 1
+        passenger_number = len(self.stations_map[self.current_node])
+        self.capacity += passenger_number
+        self.stations_map[self.current_node] = []
+        return passenger_number, transfer_num
+
+    def board_passengers(self, stations, t):
+        new_passengers = 0
+        to_remove = []
+        for passenger in stations[self.current_node]:
+            if passenger.arrival_time > t:
+                continue
+            if self.capacity > 0:
+                to = self.route[self.route_position:] if self.direction > 0 else self.route[:self.route_position + 1]
+                if passenger.path[passenger.path_pos] in to:
+                    passenger.current_bus = self.id
+                    self.capacity -= 1
+                    new_passengers += 1
+                    self.stations_map[passenger.path[passenger.path_pos]].append(passenger)
+                    to_remove.append(passenger)  # Add passenger to the removal list
+            else:
+                break
+        for passenger in to_remove:
+            stations[self.current_node].discard(passenger)
+        return new_passengers
