@@ -72,7 +72,7 @@ class Bus:
             return alighted_passengers, transfered_passengers, new_passengers
         arc_positions[self.get_arc()][self.get_arc_position()] = True
         if self.state == 'on_station':
-            self.stop_time = 0
+            self.stop_time = 30
             alighted_passengers, transfered_passengers = self.alight_passengers(stations, passengers)
             new_passengers = self.board_passengers(stations, time)   
         return alighted_passengers, transfered_passengers, new_passengers
