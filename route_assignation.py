@@ -1,11 +1,11 @@
 import json
+import data_loader
 
 ZERO_TRANSFER_MAX = 1.5
 ONE_TRANSFER_MAX = 1.1
 TWO_TRANSFER_MAX = 1.1
 
-with open('data/network.json', 'r') as file:
-    network = json.load(file)
+network = data_loader.load_network()
 
 def is_zero_transfer(Ri, Rj):
     possible_routes = set(Ri).intersection(Rj)
