@@ -1,11 +1,13 @@
-import numpy as np
+import math
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 def visualize_simulation(bus_positions, bus_routes, coordinates, network, skip_frames=1):
     fig, ax = plt.subplots()
-    ax.set_xlim(min([c[0] for c in coordinates]) - 10, max([c[0] for c in coordinates]) + 10)
-    ax.set_ylim(min([c[1] for c in coordinates]) - 10, max([c[1] for c in coordinates]) + 10)
+    min_x_val, max_x_val = min([c[0] for c in coordinates]), max([c[0] for c in coordinates])
+    min_y_val, max_y_val = min([c[1] for c in coordinates]), max([c[1] for c in coordinates])
+    ax.set_xlim(min_x_val - (max_x_val-min_x_val)/10, max_x_val + (max_x_val-min_x_val)/10)
+    ax.set_ylim(min_y_val - (max_y_val-min_y_val)/10, max_y_val + (max_y_val-min_y_val)/10)
 
     # Plot network connections
     for i, connections in enumerate(network):

@@ -84,4 +84,4 @@ network_routes = data_loader.load_routes()
 network_frequencies = data_loader.load_frequencies()
 
 # Run the simulation with visualization enabled
-run_simulation(network_routes, network_frequencies, CAP, visualize=False)
+run_simulation(network_routes, network_frequencies, CAP, visualize=True)
