@@ -7,7 +7,7 @@ import arc_manager
 
 # Constants
 STATION_NUMBER = 15
-MAX_TIME_SIMULATED = 10000
+MAX_TIME_SIMULATED = 50000
 TRANSFER_TIME = 5 * 60
 
 # Global variables
@@ -22,27 +22,31 @@ bus_positions = []
 def initialize_simulation():
     passengers_at_time = [0] * MAX_TIME_SIMULATED
     stations = [set() for _ in range(STATION_NUMBER)]
-    return passengers_at_time, stations
+    platforms_capacity = [1]*STATION_NUMBER
+    return passengers_at_time, stations, platforms_capacity
 
 def generate_entities(network_routes, network_frequencies, CAP):
-    passengers_at_time, stations = initialize_simulation()
+    passengers_at_time, stations, platforms = initialize_simulation()
     passengers = generate_passengers_test(network_routes, stations, passengers_at_time)
     bus_routes = generate_buses(network_routes, network_frequencies, CAP)
     passengers_pref_time = list(itertools.accumulate(passengers_at_time))
-    return passengers, bus_routes, passengers_pref_time, stations
+    return passengers, bus_routes, passengers_pref_time, stations, platforms
 
-def update_bus_status(bus_routes, time, arc_positions, stations, passengers, on_bus, t_time):
+def update_bus_status(bus_routes, time, arc_positions, stations, platforms, passengers, on_bus, t_time):
     global bus_positions
     current_positions = []
     for route in bus_routes:
         for bus in route:
-            alighted_passengers, transfered_passengers, new_passengers = bus.move(arc_positions, stations, passengers, time)
+            alighted_passengers, transfered_passengers, new_passengers = bus.move(arc_positions, stations, passengers, platforms, time)
             on_bus -= alighted_passengers
             t_time += TRANSFER_TIME * transfered_passengers
             on_bus += new_passengers
-            arc = bus.get_arc()
-            pos = bus.get_arc_position()
-            current_positions.append(arc_coordinates[arc][pos])
+            if(bus.state == 'on_station'):
+                current_positions.append(coordinates[bus.current_node])
+            else:
+                arc = bus.get_arc()
+                pos = bus.get_arc_position()
+                current_positions.append(arc_coordinates[arc][pos])
     bus_positions.append(current_positions)
     return on_bus, t_time
 
@@ -53,7 +57,7 @@ def update_times(passengers_pref_time, on_bus, time, n, passengers, w_time, inv_
     return w_time, inv_time
 
 def run_simulation(network_routes, network_frequencies, CAP, visualize=False):
-    passengers, bus_routes, passengers_pref_time, stations = generate_entities(network_routes, network_frequencies, CAP)
+    passengers, bus_routes, passengers_pref_time, stations, platforms = generate_entities(network_routes, network_frequencies, CAP)
     print(len(passengers))
     t_s = datetime.datetime.now()
     n = len(passengers)
@@ -61,7 +65,7 @@ def run_simulation(network_routes, network_frequencies, CAP, visualize=False):
     time = 0
 
     while len(passengers) > 0:
-        on_bus, t_time = update_bus_status(bus_routes, time, arc_positions, stations, passengers, on_bus, t_time)
+        on_bus, t_time = update_bus_status(bus_routes, time, arc_positions, stations, platforms, passengers, on_bus, t_time)
         w_time, inv_time = update_times(passengers_pref_time, on_bus, time, n, passengers, w_time, inv_time)
         time += 1
 

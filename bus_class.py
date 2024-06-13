@@ -58,23 +58,32 @@ class Bus:
         else:
             self.state = "on_road"
 
-    def move(self, arc_positions, stations, passengers, time):
+    def move(self, arc_positions, stations, passengers, stations_capacity, time):
         arc = self.get_arc()
         alighted_passengers, transfered_passengers, new_passengers = 0, 0, 0
         if self.stop_time > 0:
             self.stop_time -= 1
             return alighted_passengers, transfered_passengers, new_passengers
+        if self.state == "on_station":
+            stations_capacity[self.current_node] += 1        
         arc_positions[arc][self.get_arc_position()] = False
         self._move()
         if arc_positions[self.get_arc()][self.get_arc_position()]:
             self.undo_move()
             arc_positions[self.get_arc()][self.get_arc_position()] = True
             return alighted_passengers, transfered_passengers, new_passengers
-        arc_positions[self.get_arc()][self.get_arc_position()] = True
-        if self.state == 'on_station':
-            self.stop_time = 30
+        if self.state == "on_station" and stations_capacity[self.current_node] == 0:
+            self.undo_move()
+            arc_positions[self.get_arc()][self.get_arc_position()] = True
+            return alighted_passengers, transfered_passengers, new_passengers
+        
+        if self.state == "on_station":
+            stations_capacity[self.current_node] -= 1
+            self.stop_time = 40
             alighted_passengers, transfered_passengers = self.alight_passengers(stations, passengers)
-            new_passengers = self.board_passengers(stations, time)   
+            new_passengers = self.board_passengers(stations, time)
+                
+        arc_positions[self.get_arc()][self.get_arc_position()] = True
         return alighted_passengers, transfered_passengers, new_passengers
 
     def undo_move(self):
