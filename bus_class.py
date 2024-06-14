@@ -79,7 +79,7 @@ class Bus:
         
         if self.state == "on_station":
             stations_capacity[self.current_node] -= 1
-            self.stop_time = 40
+            self.stop_time = 30
             alighted_passengers, transfered_passengers = self.alight_passengers(stations, passengers)
             new_passengers = self.board_passengers(stations, time)
         assert stations_capacity[self.current_node] >= 0 and stations_capacity[self.current_node] <= 1
