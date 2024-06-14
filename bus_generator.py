@@ -18,7 +18,12 @@ def generate_buses(routes, frequencies, capacity):
             start_time += time_delta
     return buses
 
-def generate_buses_on_space(routes, frequencies, capacity, arcs):
+def delay_bus(bus):
+    bus.starting_time -= 1
+    bus.starting_time %= 2*bus.total_time
+    bus._set_position_at_time()
+
+def generate_buses_on_space(routes, frequencies, capacity, arcs, platforms):
     buses = [[] for _ in range(len(routes))]
     for k in range(len(routes)):
         bus_factory = BusFactory(network, routes[k])
@@ -30,12 +35,12 @@ def generate_buses_on_space(routes, frequencies, capacity, arcs):
                                              capacity, start_time)
             current_arc = new_bus.get_arc()
             current_pos = new_bus.get_arc_position()
-            while(arcs[current_arc][current_pos]):
-                new_bus.starting_time -= 1
-                new_bus.starting_time %= 2*new_bus.total_time
-                new_bus._set_position_at_time()
+            while(arcs[current_arc][current_pos] or (new_bus.state == 'on_station' and platforms[new_bus.current_node] == 0)):
+                delay_bus(new_bus)
                 current_arc = new_bus.get_arc()
                 current_pos = new_bus.get_arc_position()
+            if new_bus.state == 'on_station':
+                platforms[new_bus.current_node] -= 1
             arcs[current_arc][current_pos] = True
             buses[k].append(new_bus)
             start_time += time_delta

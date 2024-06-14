@@ -82,7 +82,7 @@ class Bus:
             self.stop_time = 40
             alighted_passengers, transfered_passengers = self.alight_passengers(stations, passengers)
             new_passengers = self.board_passengers(stations, time)
-                
+        assert stations_capacity[self.current_node] >= 0 and stations_capacity[self.current_node] <= 1
         arc_positions[self.get_arc()][self.get_arc_position()] = True
         return alighted_passengers, transfered_passengers, new_passengers
 
