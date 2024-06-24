@@ -11,8 +11,6 @@ MAX_TIME_SIMULATED = 50000
 TRANSFER_TIME = 5 * 60
 
 # Global variables
-station_passengers_history = []
-time_history = []
 coordinates = data_loader.load_coordinates()
 network = data_loader.load_network()
 arc_positions = arc_manager.create_arcs()
@@ -42,7 +40,8 @@ def update_bus_status(bus_routes, time, passengers, on_bus, t_time):
             else:
                 arc = bus.get_arc()
                 pos = bus.get_arc_position()
-                current_positions.append(arc_coordinates[arc][pos])
+                lane = bus.lane
+                current_positions.append(arc_coordinates[arc][lane][pos])
     bus_positions.append(current_positions)
     return on_bus, t_time
 

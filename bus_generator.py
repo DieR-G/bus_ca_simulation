@@ -35,13 +35,14 @@ def generate_buses_on_space(routes, frequencies, capacity, arcs, platforms):
                                              capacity, start_time)
             current_arc = new_bus.get_arc()
             current_pos = new_bus.get_arc_position()
-            while(arcs[current_arc][current_pos] or (new_bus.state == 'on_station' and platforms[new_bus.current_node] == 0)):
+            lane = new_bus.lane
+            while(arcs[current_arc][lane][current_pos] or (new_bus.state == 'on_station' and platforms[new_bus.current_node] == 0)):
                 delay_bus(new_bus)
                 current_arc = new_bus.get_arc()
                 current_pos = new_bus.get_arc_position()
             if new_bus.state == 'on_station':
                 platforms[new_bus.current_node] -= 1
-            arcs[current_arc][current_pos] = True
+            arcs[current_arc][lane][current_pos] = True
             buses[k].append(new_bus)
             start_time += time_delta
     return buses
