@@ -27,14 +27,14 @@ def create_arc_coordinates():
             if (i,j) in arc_coordinates:
                 vec *= -1
             arc_coordinates[(i,j)] = [interpolate_coordinates(coordinates[i], coordinates[j], weight*60, add=vec)]
-            arc_coordinates[(i,j)].append(interpolate_coordinates(coordinates[i], coordinates[j], weight*60, add=5*vec))
+            arc_coordinates[(i,j)].append(interpolate_coordinates(coordinates[i], coordinates[j], weight*60, add=3*vec))
     return arc_coordinates
 ######
 # Lane 0
 # Lane 1: overpass
 def create_arcs():
     arc_positions = {
-        (i, j): [[False]*weight*60, [False]*weight*60]
+        (i, j): [[""]*weight*60, [""]*weight*60]
         for i, arc in enumerate(network)
         for j, weight in arc
     }

@@ -2,9 +2,10 @@ from bus_class import Bus
 from route_assignation import compute_time
 
 class BusFactory:
-    def __init__(self, network, route):
+    def __init__(self, network, route, route_id):
         self.network = network
         self.route = route
+        self.route_id = route_id
         self.total_time = compute_time(self.route[0], self.route[-1], self.route)
 
     def node_at_time(self):
@@ -21,4 +22,4 @@ class BusFactory:
 
     def create_bus(self, id, capacity, starting_time):
         node_time_map, index_time_list = self.node_at_time()
-        return Bus(id, self.route, capacity, starting_time, self.total_time, node_time_map, index_time_list)
+        return Bus(id, self.route, self.route_id, capacity, starting_time, self.total_time, node_time_map, index_time_list)

@@ -1,5 +1,6 @@
 from bus_generator import generate_buses_on_space
 from passenger_generator import generate_passengers_test
+from platform_generator import generate_platforms
 import datetime
 import itertools
 import data_loader
@@ -7,7 +8,7 @@ import arc_manager
 
 # Constants
 STATION_NUMBER = 15
-MAX_TIME_SIMULATED = 50000
+MAX_TIME_SIMULATED = 500000
 TRANSFER_TIME = 5 * 60
 
 # Global variables
@@ -18,19 +19,19 @@ arc_coordinates = arc_manager.create_arc_coordinates()
 bus_positions = []
 passengers_at_time = [0] * MAX_TIME_SIMULATED
 stations = [set() for _ in range(STATION_NUMBER)]
-platforms = [4]*STATION_NUMBER
+platforms = generate_platforms(STATION_NUMBER)
 
 def generate_entities(network_routes, network_frequencies, CAP):
     passengers = generate_passengers_test(network_routes, stations, passengers_at_time)
     bus_routes = generate_buses_on_space(network_routes, network_frequencies, CAP, arc_positions, platforms)
     passengers_pref_time = list(itertools.accumulate(passengers_at_time))
-    return passengers, bus_routes, passengers_pref_time, stations
+    return passengers, bus_routes, passengers_pref_time
 
 def update_bus_status(bus_routes, time, passengers, on_bus, t_time):
     global bus_positions, arc_positions, stations
     current_positions = []
-    for route in bus_routes:
-        for bus in route:
+    for route_idx, route in enumerate(bus_routes):
+        for bus_idx, bus in enumerate(route):
             alighted_passengers, transfered_passengers, new_passengers = bus.move(arc_positions, stations, passengers, platforms, time)
             on_bus -= alighted_passengers
             t_time += TRANSFER_TIME * transfered_passengers
@@ -52,7 +53,7 @@ def update_times(passengers_pref_time, on_bus, time, n, passengers, w_time, inv_
     return w_time, inv_time
 
 def run_simulation(network_routes, network_frequencies, CAP, visualize=False):
-    passengers, bus_routes, passengers_pref_time, stations = generate_entities(network_routes, network_frequencies, CAP)
+    passengers, bus_routes, passengers_pref_time = generate_entities(network_routes, network_frequencies, CAP)
     print(len(passengers))
     t_s = datetime.datetime.now()
     n = len(passengers)
@@ -70,7 +71,7 @@ def run_simulation(network_routes, network_frequencies, CAP, visualize=False):
     
     if visualize:
         import visualization
-        visualization.visualize_simulation(bus_positions, bus_routes, coordinates, network, skip_frames=5)
+        visualization.visualize_simulation(bus_positions, bus_routes, coordinates, network, skip_frames=1)
 
 def print_results(time, inv_time, w_time, t_time):
     print(time)

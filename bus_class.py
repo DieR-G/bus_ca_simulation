@@ -1,5 +1,5 @@
 class Bus:
-    def __init__(self, id, route, capacity, starting_time, total_time, node_time_map, index_time_list):
+    def __init__(self, id, route, route_id, capacity, starting_time, total_time, node_time_map, index_time_list):
         """
         Initialize a Bus instance
 
@@ -14,6 +14,7 @@ class Bus:
         """
         self.id = id
         self.route = route
+        self.route_id = route_id
         self.capacity = capacity
         self.route_position = 1
         self.direction = 1
@@ -29,7 +30,7 @@ class Bus:
         self.stations_map = {i: [] for i in self.route}
         self.lane = 0
         self.previous_state = None
-        
+        self.bus_ahead = None
     def __str__(self):
         """
         String representation of the Bus
@@ -39,10 +40,7 @@ class Bus:
         """
         return f"Bus {self.id} at: {self.position}, capacity: {self.capacity}"
 
-    def _move(self):
-        """
-        Move the bus one position in its current direction on the network
-        """
+    def save_prev_state(self):
         self.previous_state = {
             "position": self.position,
             "route_position": self.route_position,
@@ -50,7 +48,11 @@ class Bus:
             "current_node": self.current_node,
             "state": self.state
         }
-        
+    
+    def _move(self):
+        """
+        Move the bus one position in its current direction on the network
+        """        
         self.position += self.direction
         if self.position in self.node_time_map:
             self.state = "on_station"
@@ -59,32 +61,40 @@ class Bus:
         else:
             self.state = "on_road"
 
-    def move(self, arc_positions, stations, passengers, stations_capacity, time):
-        arc = self.get_arc()
+    def move(self, arc_positions, stations, passengers, platforms, time):
         alighted_passengers, transfered_passengers, new_passengers = 0, 0, 0
+        self.save_prev_state()
         if self.stop_time > 0:
             self.stop_time -= 1
             return alighted_passengers, transfered_passengers, new_passengers
+        
         if self.state == "on_station":
-            stations_capacity[self.current_node] += 1        
-        arc_positions[arc][self.lane][self.get_arc_position()] = False
+            platforms[self.current_node][self.route_id] = ""
+
+        arc_positions[self.get_arc()][self.lane][self.get_arc_position()] = ""
         self._move()
-        if arc_positions[self.get_arc()][self.lane][self.get_arc_position()]:
+        if self.state == "on_station" and platforms[self.current_node][self.route_id] != "":
             self.undo_move()
-            arc_positions[self.get_arc()][self.lane][self.get_arc_position()] = True
+            arc_positions[self.get_arc()][self.lane][self.get_arc_position()] = self.id
             return alighted_passengers, transfered_passengers, new_passengers
-        if self.state == "on_station" and stations_capacity[self.current_node] == 0:
+        
+        if arc_positions[self.get_arc()][self.lane][self.get_arc_position()] != "" and self.state == 'on_road':
             self.undo_move()
-            arc_positions[self.get_arc()][self.lane][self.get_arc_position()] = True
+            if self.state == "on_station":
+                platforms[self.current_node][self.route_id] = self.id
+            if self.bus_ahead.current_node != self.current_node and arc_positions[self.get_arc()][1][self.get_arc_position()] == "":
+                self.lane = 1
+            arc_positions[self.get_arc()][self.lane][self.get_arc_position()] = self.id
             return alighted_passengers, transfered_passengers, new_passengers
         
         if self.state == "on_station":
-            stations_capacity[self.current_node] -= 1
+            self.lane = 0
+            platforms[self.current_node][self.route_id] = self.id
             self.stop_time = 30
             alighted_passengers, transfered_passengers = self.alight_passengers(stations, passengers)
             new_passengers = self.board_passengers(stations, time)
-
-        arc_positions[self.get_arc()][self.lane][self.get_arc_position()] = True
+                 
+        arc_positions[self.get_arc()][self.lane][self.get_arc_position()] = self.id
         return alighted_passengers, transfered_passengers, new_passengers
 
     def undo_move(self):
@@ -94,7 +104,6 @@ class Bus:
             self.direction = self.previous_state["direction"]
             self.current_node = self.previous_state["current_node"]
             self.state = self.previous_state["state"]
-            self.previous_state = None  # Clear the previous state after undoing
         else:
             print("No move to undo")
 
@@ -225,12 +234,10 @@ class Bus:
         at_idx, next_idx = self._get_position_at_time(t)
         self.route_position = next_idx
         self.state = "on_station"
-        if t in self.node_time_map:
-            self.current_node = self.route[at_idx]
-        elif 2 * self.total_time - t in self.node_time_map:
-            self.current_node = self.route[next_idx]
-            self._update_position()
-        else:
+        self.current_node = self.route[at_idx]
+        if 2 * self.total_time - t in self.node_time_map:
+            self.direction = -1
+        elif t not in self.node_time_map:
             self.state = "on_road"
         self.position = t if self.direction > 0 else 2 * self.total_time - t
 
