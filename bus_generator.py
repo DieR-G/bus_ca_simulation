@@ -51,9 +51,12 @@ def generate_buses_on_space(routes, frequencies, capacity, arcs, platforms):
                 delay_bus(new_bus)
                 current_arc = new_bus.get_arc()
                 current_pos = new_bus.get_arc_position()
-                
+            
+            platform_direction = lambda x: 0 if x == 1 else 1
+            
             if new_bus.state == 'on_station':
-                platforms[new_bus.current_node][new_bus.route_id] = new_bus.id
+                platforms[new_bus.current_node][new_bus.route_id][platform_direction(new_bus.direction)] = new_bus.id
+                
             arcs[current_arc][lane][current_pos] = new_bus.id
             buses[k].append(new_bus)
             start_time += time_delta

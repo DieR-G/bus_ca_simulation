@@ -68,12 +68,14 @@ class Bus:
             self.stop_time -= 1
             return alighted_passengers, transfered_passengers, new_passengers
         
+        platform_direction = lambda x: 0 if x == 1 else 1
+
         if self.state == "on_station":
-            platforms[self.current_node][self.route_id] = ""
+            platforms[self.current_node][self.route_id][platform_direction(self.direction)] = ""
 
         arc_positions[self.get_arc()][self.lane][self.get_arc_position()] = ""
         self._move()
-        if self.state == "on_station" and platforms[self.current_node][self.route_id] != "":
+        if self.state == "on_station" and platforms[self.current_node][self.route_id][platform_direction(self.direction)] != "":
             self.undo_move()
             arc_positions[self.get_arc()][self.lane][self.get_arc_position()] = self.id
             return alighted_passengers, transfered_passengers, new_passengers
@@ -81,15 +83,19 @@ class Bus:
         if arc_positions[self.get_arc()][self.lane][self.get_arc_position()] != "" and self.state == 'on_road':
             self.undo_move()
             if self.state == "on_station":
-                platforms[self.current_node][self.route_id] = self.id
-            if self.bus_ahead.current_node != self.current_node and arc_positions[self.get_arc()][1][self.get_arc_position()] == "":
+                platforms[self.current_node][self.route_id][platform_direction(self.direction)] = self.id
+            
+            if (self.bus_ahead.current_node != self.current_node and 
+                    arc_positions[self.get_arc()][1][self.get_arc_position()] == ""):
                 self.lane = 1
+            
             arc_positions[self.get_arc()][self.lane][self.get_arc_position()] = self.id
+            
             return alighted_passengers, transfered_passengers, new_passengers
         
         if self.state == "on_station":
             self.lane = 0
-            platforms[self.current_node][self.route_id] = self.id
+            platforms[self.current_node][self.route_id][platform_direction(self.direction)] = self.id
             self.stop_time = 30
             alighted_passengers, transfered_passengers = self.alight_passengers(stations, passengers)
             new_passengers = self.board_passengers(stations, time)
