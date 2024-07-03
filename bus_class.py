@@ -67,7 +67,6 @@ class Bus:
         if self.stop_time > 0:
             self.stop_time -= 1
             return alighted_passengers, transfered_passengers, new_passengers
-        
         platform_direction = lambda x: 0 if x == 1 else 1
 
         if self.state == "on_station":
@@ -75,6 +74,9 @@ class Bus:
 
         arc_positions[self.get_arc()][self.lane][self.get_arc_position()] = ""
         self._move()
+        
+        steps_left = abs(self.index_time_list[self.route_position] - self.position)
+
         if self.state == "on_station" and platforms[self.current_node][self.route_id][platform_direction(self.direction)] != "":
             self.undo_move()
             arc_positions[self.get_arc()][self.lane][self.get_arc_position()] = self.id
@@ -86,7 +88,8 @@ class Bus:
                 platforms[self.current_node][self.route_id][platform_direction(self.direction)] = self.id
             
             if (self.bus_ahead.current_node != self.current_node and 
-                    arc_positions[self.get_arc()][1][self.get_arc_position()] == ""):
+                    arc_positions[self.get_arc()][1][self.get_arc_position()] == "" and
+                    steps_left <= 10):
                 self.lane = 1
             
             arc_positions[self.get_arc()][self.lane][self.get_arc_position()] = self.id
