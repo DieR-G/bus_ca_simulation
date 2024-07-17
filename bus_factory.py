@@ -15,8 +15,8 @@ class BusFactory:
         t = 0
         for idx, node in enumerate(self.route):
             t += next((c for a, c in self.network[node] if a == current_node), 0)
-            node_time_map[t * 60] = node
-            index_time_list[idx] = t * 60
+            node_time_map[t] = node
+            index_time_list[idx] = t
             current_node = node
         return node_time_map, index_time_list
 

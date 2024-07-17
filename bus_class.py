@@ -25,7 +25,7 @@ class Bus:
         self.starting_time = starting_time
         self.node_time_map = node_time_map
         self.index_time_list = index_time_list
-        self.total_time = 60 * total_time  # Convert total_time to seconds
+        self.total_time = total_time  # Convert total_time to seconds
         self._set_position_at_time()
         self.stations_map = {i: [] for i in self.route}
         self.lane = 0
@@ -223,7 +223,7 @@ class Bus:
         """
         if t >= self.total_time:
             t -= self.total_time
-            idx = self._binary_search(lambda x: self.index_time_list[-1] - self.index_time_list[x] < t)
+            idx = self._binary_search(lambda x: self.index_time_list[-1] - self.index_time_list[x] <= t)
             self.direction = -1
         else:
             idx = self._binary_search(lambda x: self.index_time_list[x] > t)

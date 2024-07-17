@@ -6,16 +6,17 @@ import itertools
 import data_loader
 import arc_manager
 
-# Constants
-STATION_NUMBER = 15
-MAX_TIME_SIMULATED = 500000
-TRANSFER_TIME = 5 * 60
-
 # Global variables
 coordinates = data_loader.load_coordinates()
 network = data_loader.load_network()
 arc_positions = arc_manager.create_arcs()
 arc_coordinates = arc_manager.create_arc_coordinates()
+
+# Constants
+STATION_NUMBER = len(network)
+MAX_TIME_SIMULATED = 500000
+TRANSFER_TIME = 5 * 60
+
 bus_positions = []
 passengers_at_time = [0] * MAX_TIME_SIMULATED
 stations = [set() for _ in range(STATION_NUMBER)]
@@ -78,7 +79,7 @@ def print_results(time, inv_time, w_time, t_time):
     print(inv_time // 60, w_time // 60, t_time // 60, (inv_time + w_time + t_time) // 60)
 
 # Simulation parameters
-CAP = 50
+CAP = 140
 
 network_routes = data_loader.load_routes()
 network_frequencies = data_loader.load_frequencies()

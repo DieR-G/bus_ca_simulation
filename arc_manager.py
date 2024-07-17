@@ -26,15 +26,15 @@ def create_arc_coordinates():
             vec *= np.linalg.norm(range_vec)/300
             if (i,j) in arc_coordinates:
                 vec *= -1
-            arc_coordinates[(i,j)] = [interpolate_coordinates(coordinates[i], coordinates[j], weight*60, add=vec)]
-            arc_coordinates[(i,j)].append(interpolate_coordinates(coordinates[i], coordinates[j], weight*60, add=3*vec))
+            arc_coordinates[(i,j)] = [interpolate_coordinates(coordinates[i], coordinates[j], weight, add=vec)]
+            arc_coordinates[(i,j)].append(interpolate_coordinates(coordinates[i], coordinates[j], weight, add=3*vec))
     return arc_coordinates
 ######
 # Lane 0
 # Lane 1: overpass
 def create_arcs():
     arc_positions = {
-        (i, j): [[""]*weight*60, [""]*weight*60]
+        (i, j): [[""]*weight, [""]*weight]
         for i, arc in enumerate(network)
         for j, weight in arc
     }
