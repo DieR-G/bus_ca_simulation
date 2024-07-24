@@ -1,6 +1,7 @@
 from bus_generator import generate_buses_on_space
 from passenger_generator import generate_passengers_test
 from platform_generator import generate_platforms
+from logger import save_state_data, save_to_csv
 import datetime
 import itertools
 import data_loader
@@ -18,21 +19,32 @@ MAX_TIME_SIMULATED = 500000
 TRANSFER_TIME = 5 * 60
 
 bus_positions = []
+bus_occupancies = []
+bus_speeds = []
+route_bus_number = []
 passengers_at_time = [0] * MAX_TIME_SIMULATED
 stations = [set() for _ in range(STATION_NUMBER)]
 platforms = generate_platforms(STATION_NUMBER)
 
 def generate_entities(network_routes, network_frequencies, CAP):
+    global bus_occupancies, bus_speeds, route_bus_number
     passengers = generate_passengers_test(network_routes, stations, passengers_at_time)
     bus_routes = generate_buses_on_space(network_routes, network_frequencies, CAP, arc_positions, platforms)
     passengers_pref_time = list(itertools.accumulate(passengers_at_time))
+    bus_occupancies = [[] for _ in bus_routes]
+    bus_speeds = [[] for _ in bus_routes]
+    route_bus_number = [len(route) for route in bus_routes]
     return passengers, bus_routes, passengers_pref_time
 
 def update_bus_status(bus_routes, time, passengers, on_bus, t_time):
-    global bus_positions, arc_positions, stations
+    global bus_positions, arc_positions, stations, bus_occupancies, bus_speeds, route_bus_number
     current_positions = []
     for route_idx, route in enumerate(bus_routes):
+        total_occupancy = 0
+        total_speed = 0
         for bus_idx, bus in enumerate(route):
+            total_occupancy += CAP - bus.capacity
+            total_speed += bus.speed
             alighted_passengers, transfered_passengers, new_passengers = bus.move(arc_positions, stations, passengers, platforms, time)
             on_bus -= alighted_passengers
             t_time += TRANSFER_TIME * transfered_passengers
@@ -44,6 +56,9 @@ def update_bus_status(bus_routes, time, passengers, on_bus, t_time):
                 pos = bus.get_arc_position()
                 lane = bus.lane
                 current_positions.append(arc_coordinates[arc][lane][pos])
+        bus_occupancies[route_idx].append(total_occupancy/(CAP*route_bus_number[route_idx]))
+        bus_speeds[route_idx].append(total_speed/route_bus_number[route_idx])
+        
     bus_positions.append(current_positions)
     return on_bus, t_time
 
@@ -53,7 +68,7 @@ def update_times(passengers_pref_time, on_bus, time, n, passengers, w_time, inv_
     inv_time += on_bus
     return w_time, inv_time
 
-def run_simulation(network_routes, network_frequencies, CAP, visualize=False):
+def run_simulation(network_routes, network_frequencies, CAP, visualize=False, save_metrics=False):
     passengers, bus_routes, passengers_pref_time = generate_entities(network_routes, network_frequencies, CAP)
     print(len(passengers))
     t_s = datetime.datetime.now()
@@ -65,24 +80,29 @@ def run_simulation(network_routes, network_frequencies, CAP, visualize=False):
         on_bus, t_time = update_bus_status(bus_routes, time, passengers, on_bus, t_time)
         w_time, inv_time = update_times(passengers_pref_time, on_bus, time, n, passengers, w_time, inv_time)
         time += 1
+        
+        if save_metrics:
+            save_state_data(bus_routes, time, CAP)
+        
 
+    save_to_csv()
     print_results(time, inv_time, w_time, t_time)
     t_e = datetime.datetime.now()
     print(t_e - t_s)
     
     if visualize:
         import visualization
-        visualization.visualize_simulation(bus_positions, bus_routes, coordinates, network, skip_frames=1)
+        visualization.visualize_simulation(bus_positions, bus_routes, coordinates, network, bus_occupancies, bus_speeds, skip_frames=1)
 
 def print_results(time, inv_time, w_time, t_time):
     print(time)
     print(inv_time // 60, w_time // 60, t_time // 60, (inv_time + w_time + t_time) // 60)
 
 # Simulation parameters
-CAP = 140
+CAP = 84
 
 network_routes = data_loader.load_routes()
 network_frequencies = data_loader.load_frequencies()
 
 # Run the simulation with visualization enabled
-run_simulation(network_routes, network_frequencies, CAP, visualize=True)
+run_simulation(network_routes, network_frequencies, CAP, visualize=True, save_metrics=True)

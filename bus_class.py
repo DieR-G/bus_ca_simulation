@@ -20,6 +20,7 @@ class Bus:
         self.direction = 1
         self.current_node = route[0]
         self.state = "on_station"
+        self.speed = 0
         self.position = 0
         self.stop_time = 0
         self.starting_time = starting_time
@@ -64,6 +65,7 @@ class Bus:
     def move(self, arc_positions, stations, passengers, platforms, time):
         alighted_passengers, transfered_passengers, new_passengers = 0, 0, 0
         self.save_prev_state()
+        self.speed = 0
         if self.stop_time > 0:
             self.stop_time -= 1
             return alighted_passengers, transfered_passengers, new_passengers
@@ -100,10 +102,12 @@ class Bus:
             self.lane = 0
             platforms[self.current_node][self.route_id][platform_direction(self.direction)] = self.id
             self.stop_time = 30
+            self.speed = 0
             alighted_passengers, transfered_passengers = self.alight_passengers(stations, passengers)
             new_passengers = self.board_passengers(stations, time)
                  
         arc_positions[self.get_arc()][self.lane][self.get_arc_position()] = self.id
+        self.speed = 50
         return alighted_passengers, transfered_passengers, new_passengers
 
     def undo_move(self):

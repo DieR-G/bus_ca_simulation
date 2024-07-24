@@ -2,7 +2,7 @@ import math
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-def visualize_simulation(bus_positions, bus_routes, coordinates, network, skip_frames=1):
+def visualize_simulation(bus_positions, bus_routes, coordinates, network, occupancies, speeds, skip_frames=1):
     fig, ax = plt.subplots()
     min_x_val, max_x_val = min([c[0] for c in coordinates]), max([c[0] for c in coordinates])
     min_y_val, max_y_val = min([c[1] for c in coordinates]), max([c[1] for c in coordinates])
@@ -16,32 +16,60 @@ def visualize_simulation(bus_positions, bus_routes, coordinates, network, skip_f
             end = coordinates[j]
             ax.plot([start[0], end[0]], [start[1], end[1]], 'k-', lw=0.5)
 
-    # Plot nodes with larger size and purple color
-    ax.plot([c[0] for c in coordinates], [c[1] for c in coordinates], 'o', color='red', markersize=5)
-
     # Define custom colors for the routes
     custom_colors = ['blue', 'orange', 'magenta', 'purple']
 
     # Create bus markers for each route
     buses = []
     for route_index, route in enumerate(bus_routes):
-        route_color = custom_colors[route_index % len(custom_colors)]  # Cycle through custom colors
-        route_buses = [ax.plot([], [], 'o', color=route_color, markersize=4)[0] for _ in route]
+        route_color = custom_colors[route_index % len(custom_colors)]
+        route_buses = [ax.plot([], [], 'o', color=route_color, markersize=2)[0] for _ in route]
         buses.extend(route_buses)
 
+    # Create station markers
+    stations = ax.scatter([c[0] for c in coordinates], [c[1] for c in coordinates], 
+                          marker='s', color='red', s=10, zorder=10)
+
+    # Text annotations for occupancies and speeds
+    occupancy_texts = []
+    speed_texts = []
+    time_texts = []
+    for i in range(len(bus_routes)):
+        occupancy_text = ax.text(0.02, 0.95 - i * 0.15, '', transform=ax.transAxes, fontsize=8, color=custom_colors[i % len(custom_colors)])
+        occupancy_texts.append(occupancy_text)
+        speed_text = ax.text(0.02, 0.90 - i * 0.15, '', transform=ax.transAxes, fontsize=8, color=custom_colors[i % len(custom_colors)])
+        speed_texts.append(speed_text)
+        time_text = ax.text(0.02, 0.85 - i * 0.15, '', transform=ax.transAxes, fontsize=8, color='black')
+        time_texts.append(time_text)
     def init():
         for bus in buses:
             bus.set_data([], [])
-        return buses
+        for occupancy_text in occupancy_texts:
+            occupancy_text.set_text('')
+        for speed_text in speed_texts:
+            speed_text.set_text('')
+        return buses + [stations] + occupancy_texts + speed_texts
 
     def update(frame):
-        positions = bus_positions[frame * skip_frames]  # Skip frames to speed up animation
+        positions = bus_positions[frame * skip_frames]
         for bus, pos in zip(buses, positions):
-            bus.set_data([pos[0]], [pos[1]])  # Pass coordinates as lists
-        return buses
+            bus.set_data([pos[0]], [pos[1]])
+
+        # Update occupancy and speed texts
+        for i, (occupancy_text, speed_text) in enumerate(zip(occupancy_texts, speed_texts)):
+            occupancy_text.set_text(f'Route {i+1} Occupancy: {round(100*occupancies[i][frame * skip_frames])}%')
+            speed_text.set_text(f'Route {i+1} Avg Speed: {speeds[i][frame * skip_frames]:.2f} km/h')
+        
+        minutes, seconds = divmod(frame, 60)
+        hours, minutes = divmod(minutes, 60)
+        time_text.set_text(f'Time (hh:mm:ss): {int(hours):02}:{int(minutes):02}:{int(seconds):02}')
+        # Redraw stations on top
+        stations.set_offsets(coordinates)
+
+        return buses + [stations] + occupancy_texts + speed_texts + [time_text]
 
     ani = animation.FuncAnimation(
         fig, update, frames=range(0, len(bus_positions) // skip_frames), init_func=init,
-        blit=True, interval=30, repeat=False  # Adjust interval as needed
+        blit=True, interval=30, repeat=False
     )
     plt.show()

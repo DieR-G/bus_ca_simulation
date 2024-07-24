@@ -23,11 +23,11 @@ def create_arc_coordinates():
             dy = coordinates[j][1] - coordinates[i][1]
             vec = np.array([-dy, dx], dtype='float64')
             vec /= np.linalg.norm(vec)
-            vec *= np.linalg.norm(range_vec)/300
+            vec *= np.linalg.norm(range_vec)/500
             if (i,j) in arc_coordinates:
                 vec *= -1
             arc_coordinates[(i,j)] = [interpolate_coordinates(coordinates[i], coordinates[j], weight, add=vec)]
-            arc_coordinates[(i,j)].append(interpolate_coordinates(coordinates[i], coordinates[j], weight, add=3*vec))
+            arc_coordinates[(i,j)].append(interpolate_coordinates(coordinates[i], coordinates[j], weight, add=2*vec))
     return arc_coordinates
 ######
 # Lane 0
