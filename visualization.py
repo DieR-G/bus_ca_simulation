@@ -39,7 +39,7 @@ def visualize_simulation(bus_positions, bus_routes, coordinates, network, occupa
         occupancy_texts.append(occupancy_text)
         speed_text = ax.text(0.02, 0.90 - i * 0.15, '', transform=ax.transAxes, fontsize=8, color=custom_colors[i % len(custom_colors)])
         speed_texts.append(speed_text)
-        time_text = ax.text(0.02, 0.85 - i * 0.15, '', transform=ax.transAxes, fontsize=8, color='black')
+        time_text = ax.text(0.8, i * 0.15, '', transform=ax.transAxes, fontsize=8, color='black')
         time_texts.append(time_text)
     def init():
         for bus in buses:
