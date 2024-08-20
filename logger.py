@@ -9,13 +9,13 @@ bus_data = {
         'arc': []
     }
 
-def save_state_data(bus_routes, t, total_bus_capacity):
-    for route in bus_routes:
+def save_state_data(bus_routes, t, total_bus_capacities):
+    for r_idx, route in enumerate(bus_routes):
         for bus in route:
             bus_data['bus_id'].append(bus.id)
             bus_data['route_id'].append(bus.route_id)
             bus_data['time'].append(t)
-            bus_data['passenger_count'].append(total_bus_capacity - bus.capacity)
+            bus_data['passenger_count'].append(total_bus_capacities[r_idx] - bus.capacity)
             bus_data['speed'].append(bus.speed)
             bus_data['arc'].append(bus.get_arc())
             

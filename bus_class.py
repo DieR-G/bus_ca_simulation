@@ -1,3 +1,5 @@
+from collections import deque
+RECORDED_SECONDS = 60*5
 class Bus:
     def __init__(self, id, route, route_id, capacity, starting_time, total_time, node_time_map, index_time_list):
         """
@@ -32,6 +34,8 @@ class Bus:
         self.lane = 0
         self.previous_state = None
         self.bus_ahead = None
+        self.speed_record = deque([])
+        self.speed_record_sum = 0
     def __str__(self):
         """
         String representation of the Bus
@@ -47,7 +51,8 @@ class Bus:
             "route_position": self.route_position,
             "direction": self.direction,
             "current_node": self.current_node,
-            "state": self.state
+            "state": self.state,
+            "arc": self.get_arc()
         }
     
     def _move(self):
@@ -62,10 +67,26 @@ class Bus:
         else:
             self.state = "on_road"
 
+    def get_last_avg_speed(self):
+        if len(self.speed_record) < RECORDED_SECONDS:
+            return -1
+        return self.speed_record_sum / RECORDED_SECONDS
+    
+    def save_speed_record(self):
+        if len(self.speed_record) == RECORDED_SECONDS:
+            self.speed_record_sum -= self.speed_record.popleft()
+            self.speed_record.append(self.speed)
+            self.speed_record_sum += self.speed
+        else:
+            self.speed_record_sum += self.speed
+            self.speed_record.append(self.speed)
+    
     def move(self, arc_positions, stations, passengers, platforms, time):
         alighted_passengers, transfered_passengers, new_passengers = 0, 0, 0
         self.save_prev_state()
         self.speed = 0
+        self.save_speed_record()
+            
         if self.stop_time > 0:
             self.stop_time -= 1
             return alighted_passengers, transfered_passengers, new_passengers
@@ -102,12 +123,13 @@ class Bus:
             self.lane = 0
             platforms[self.current_node][self.route_id][platform_direction(self.direction)] = self.id
             self.stop_time = 30
-            self.speed = 0
             alighted_passengers, transfered_passengers = self.alight_passengers(stations, passengers)
             new_passengers = self.board_passengers(stations, time)
                  
         arc_positions[self.get_arc()][self.lane][self.get_arc_position()] = self.id
         self.speed = 50
+        self.speed_record_sum -= self.speed_record.popleft()
+        self.save_speed_record()
         return alighted_passengers, transfered_passengers, new_passengers
 
     def undo_move(self):
