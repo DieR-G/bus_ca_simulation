@@ -16,7 +16,7 @@ def floyd_warshall(n):
                 mat[i][j] = min(mat[i][j], mat[i][k] + mat[k][j])
     return mat
 
-
+print(len(network))
 distances = floyd_warshall(len(network))
 with open('distance_mat.json', 'w') as file:
     json.dump(distances, file)
