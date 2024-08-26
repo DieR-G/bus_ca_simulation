@@ -29,10 +29,10 @@ passengers_at_time = [0] * MAX_TIME_SIMULATED
 stations = [set() for _ in range(STATION_NUMBER)]
 platforms = generate_platforms(STATION_NUMBER)
 
-def generate_entities(network_routes, network_frequencies, capacities):
+def generate_entities(network_routes, network_stops, network_frequencies, capacities):
     global bus_occupancies, bus_speeds, route_bus_number, route_slowest_arc
     passengers = generate_passengers_test(network_routes, stations, passengers_at_time)
-    bus_routes = generate_buses_on_space(network_routes, network_frequencies, capacities, arc_positions, platforms)
+    bus_routes = generate_buses_on_space(network_routes, network_stops, network_frequencies, capacities, arc_positions, platforms)
     passengers_pref_time = list(itertools.accumulate(passengers_at_time))
     bus_occupancies = [[] for _ in bus_routes]
     bus_speeds = [[] for _ in bus_routes]
@@ -88,8 +88,8 @@ def update_times(passengers_pref_time, on_bus, time, n, passengers, w_time, inv_
     inv_time += on_bus
     return w_time, inv_time
 
-def run_simulation(network_routes, network_frequencies, capacities, visualize=False, save_metrics=False):
-    passengers, bus_routes, passengers_pref_time = generate_entities(network_routes, network_frequencies, capacities)
+def run_simulation(network_routes, network_stops, network_frequencies, capacities, visualize=False, save_metrics=False):
+    passengers, bus_routes, passengers_pref_time = generate_entities(network_routes, network_stops, network_frequencies, capacities)
     print(len(passengers))
     t_s = datetime.datetime.now()
     n = len(passengers)
@@ -122,9 +122,10 @@ def print_results(time, inv_time, w_time, t_time):
 
 # Simulation parameters
 network_routes = data_loader.load_routes()
+network_stops = data_loader.load_stops()
 network_frequencies = data_loader.load_frequencies()
 network_capacities = data_loader.load_capacities()
 
 # Run the simulation with visualization enabled
-run_simulation(network_routes, network_frequencies, network_capacities, visualize=True, save_metrics=True)
+run_simulation(network_routes, network_stops, network_frequencies, network_capacities, visualize=False, save_metrics=False)
 #get_transfers_routes(43, 28, network_routes)

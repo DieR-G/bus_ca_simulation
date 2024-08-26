@@ -1,7 +1,7 @@
 from collections import deque
 RECORDED_SECONDS = 60*5
 class Bus:
-    def __init__(self, id, route, route_id, capacity, starting_time, total_time, node_time_map, index_time_list):
+    def __init__(self, id, route, stops, route_id, capacity, starting_time, total_time, node_time_map, index_time_list):
         """
         Initialize a Bus instance
 
@@ -16,6 +16,7 @@ class Bus:
         """
         self.id = id
         self.route = route
+        self.stops = stops
         self.route_id = route_id
         self.capacity = capacity
         self.route_position = 1

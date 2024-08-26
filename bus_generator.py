@@ -34,10 +34,10 @@ def delay_bus(bus):
     bus.starting_time %= 2*bus.total_time
     bus._set_position_at_time()
 
-def generate_buses_on_space(routes, frequencies, capacities, arcs, platforms):
+def generate_buses_on_space(routes, stops, frequencies, capacities, arcs, platforms):
     buses = [[] for _ in range(len(routes))]
     for k in range(len(routes)):
-        bus_factory = BusFactory(network, routes[k], k)
+        bus_factory = BusFactory(network, routes[k], stops[k], k)
         bus_number = math.ceil(frequencies[k] * bus_factory.total_time / (60*30))
         time_delta = math.ceil(3600 / frequencies[k])
         start_time = 0

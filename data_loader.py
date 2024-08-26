@@ -4,6 +4,7 @@ COORDINATES_PATH = 'data/coordinates4.json'
 DEMAND_MATRIX_PATH = 'data/demand_matrix4.json'
 NETWORK_PATH = 'data/network4.json'
 ROUTES_PATH = 'data/routes4.json'
+STOPS_PATH = 'data/stops4.json'
 FREQUENCIES_PATH = 'data/frequencies4.json'
 CAPACITIES_PATH = 'data/capacities4.json'
 
@@ -26,6 +27,11 @@ def load_routes():
     with open(ROUTES_PATH, 'r') as file:
         routes = json.load(file)
     return routes
+
+def load_stops():
+    with open(STOPS_PATH, 'r') as file:
+        stops = json.load(file)
+    return stops
 
 def load_frequencies():
     with open(FREQUENCIES_PATH, 'r') as file:
