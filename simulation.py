@@ -16,7 +16,7 @@ arc_coordinates = arc_manager.create_arc_coordinates()
 
 # Constants
 STATION_NUMBER = len(network)
-MAX_TIME_SIMULATED = 50000
+MAX_TIME_SIMULATED = 500000
 TRANSFER_TIME = 5 * 60
 
 bus_positions = []
@@ -31,7 +31,7 @@ platforms = generate_platforms(STATION_NUMBER)
 
 def generate_entities(network_routes, network_stops, network_frequencies, capacities):
     global bus_occupancies, bus_speeds, route_bus_number, route_slowest_arc
-    passengers = generate_passengers_test(network_routes, stations, passengers_at_time)
+    passengers = generate_passengers_test(network_routes, network_stops, stations, passengers_at_time)
     bus_routes = generate_buses_on_space(network_routes, network_stops, network_frequencies, capacities, arc_positions, platforms)
     passengers_pref_time = list(itertools.accumulate(passengers_at_time))
     bus_occupancies = [[] for _ in bus_routes]
@@ -127,5 +127,5 @@ network_frequencies = data_loader.load_frequencies()
 network_capacities = data_loader.load_capacities()
 
 # Run the simulation with visualization enabled
-run_simulation(network_routes, network_stops, network_frequencies, network_capacities, visualize=False, save_metrics=False)
+run_simulation(network_routes, network_stops, network_frequencies, network_capacities, visualize=True, save_metrics=False)
 #get_transfers_routes(43, 28, network_routes)

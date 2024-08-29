@@ -29,9 +29,9 @@ class Passenger:
     def __hash__(self):
         return hash(self.id)
     
-def generate_passengers_test(routes, stations_set, passengers_at_time):
+def generate_passengers_test(routes, stops, stations_set, passengers_at_time):
     passenger_set = set()
-    travels = get_travel_routes(routes)
+    travels = get_travel_routes(routes, stops)
     pass_idx = 0
     for i in range(len(demand_matrix)):
         for j in range(len(demand_matrix)):

@@ -59,9 +59,9 @@ def get_path(i, j, r):
         pairs.reverse()
     return pairs
 
-def get_transfers_routes(i, j, routes):
-    Ri = [e for (e, x) in enumerate(routes) if i in x]
-    Rj = [e for (e, x) in enumerate(routes) if j in x]
+def get_transfers_routes(i, j, routes, stops):
+    Ri = [e for (e, x) in enumerate(stops) if i in x]
+    Rj = [e for (e, x) in enumerate(stops) if j in x]
     filtered_routes = []
     if is_zero_transfer(Ri, Rj):
         possible_routes = set(Ri).intersection(Rj)
@@ -125,13 +125,13 @@ def get_transfers_routes(i, j, routes):
         ]
     return filtered_routes #Gives the nodes in reverse
 
-def get_travel_routes(routes):
+def get_travel_routes(routes, stops):
     travel = [[[] for _ in range(len(network))] for _ in range(len(network))]
 
     for i in range(len(network)):
         for j in range(len(network)):
             if i == j: continue
-            travel[i][j] = get_transfers_routes(i, j, routes)
+            travel[i][j] = get_transfers_routes(i, j, routes, stops)
 
     return travel
 

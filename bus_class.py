@@ -16,7 +16,7 @@ class Bus:
         """
         self.id = id
         self.route = route
-        self.stops = stops
+        self.stops = set(stops)
         self.route_id = route_id
         self.capacity = capacity
         self.route_position = 1
@@ -65,8 +65,8 @@ class Bus:
             self.state = "on_station"
             self.current_node = self.node_time_map[self.position]
             self._update_position()
-        else:
-            self.state = "on_road"
+            return    
+        self.state = "on_road"
 
     def get_last_avg_speed(self):
         if len(self.speed_record) < RECORDED_SECONDS:
@@ -120,7 +120,7 @@ class Bus:
             
             return alighted_passengers, transfered_passengers, new_passengers
         
-        if self.state == "on_station":
+        if self.state == "on_station" and self.node_time_map[self.position] in self.stops:
             self.lane = 0
             platforms[self.current_node][self.route_id][platform_direction(self.direction)] = self.id
             self.stop_time = 30
@@ -308,7 +308,7 @@ class Bus:
                 continue
             if self.capacity > 0:
                 to = self.route[self.route_position:] if self.direction > 0 else self.route[:self.route_position + 1]
-                if passenger.path[passenger.path_pos] in to:
+                if passenger.path[passenger.path_pos] in to and passenger.path[passenger.path_pos] in self.stops:
                     passenger.current_bus = self.id
                     self.capacity -= 1
                     new_passengers += 1
