@@ -105,7 +105,7 @@ class Bus:
             self.undo_move()
             arc_positions[self.get_arc()][self.lane][self.get_arc_position()] = self.id
             return alighted_passengers, transfered_passengers, new_passengers
-        
+                
         if arc_positions[self.get_arc()][self.lane][self.get_arc_position()] != "" and self.state == 'on_road':
             self.undo_move()
             if self.state == "on_station":
@@ -116,16 +116,21 @@ class Bus:
                     steps_left <= 10):
                 self.lane = 1
             
+            if (self.get_next_node() not in self.stops and arc_positions[self.get_arc()][1][self.get_arc_position()] == "" and
+                    steps_left <= 10):
+                self.lane = 1
+            
             arc_positions[self.get_arc()][self.lane][self.get_arc_position()] = self.id
             
             return alighted_passengers, transfered_passengers, new_passengers
         
-        if self.state == "on_station" and self.node_time_map[self.position] in self.stops:
+        if self.state == "on_station":
             self.lane = 0
             platforms[self.current_node][self.route_id][platform_direction(self.direction)] = self.id
-            self.stop_time = 30
-            alighted_passengers, transfered_passengers = self.alight_passengers(stations, passengers)
-            new_passengers = self.board_passengers(stations, time)
+            if self.node_time_map[self.position] in self.stops:
+                self.stop_time = 30
+                alighted_passengers, transfered_passengers = self.alight_passengers(stations, passengers)
+                new_passengers = self.board_passengers(stations, time)
                  
         arc_positions[self.get_arc()][self.lane][self.get_arc_position()] = self.id
         self.speed = 50
