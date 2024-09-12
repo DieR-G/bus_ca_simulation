@@ -1,17 +1,30 @@
 import json
+import heapq as pq
 
-COORDINATES_PATH = 'data/coordinates4.json'
-DEMAND_MATRIX_PATH = 'data/demand_matrix4.json'
-NETWORK_PATH = 'data/network4.json'
-ROUTES_PATH = 'data/routes4.json'
-STOPS_PATH = 'data/stops4.json'
-FREQUENCIES_PATH = 'data/frequencies4.json'
-CAPACITIES_PATH = 'data/capacities4.json'
+INSTANCE_PATH=  'data/instance7'
+
+COORDINATES_PATH = INSTANCE_PATH + '/coordinates.json'
+DEMAND_MATRIX_PATH = INSTANCE_PATH + '/demand_matrix.json'
+NETWORK_PATH = INSTANCE_PATH + '/network.json'
+ROUTES_PATH = INSTANCE_PATH + '/routes.json'
+STOPS_PATH = INSTANCE_PATH + '/stops.json'
+FREQUENCIES_PATH = INSTANCE_PATH + '/frequencies.json'
+CAPACITIES_PATH = INSTANCE_PATH + '/capacities.json'
 
 def load_coordinates():
     with open(COORDINATES_PATH, 'r') as file:
         coordinates = json.load(file)
     return coordinates
+
+
+""" nodes = [0] * len(demand_matrix)
+    h = []
+    for i in range(len(demand_matrix)):
+        for j in range(len(demand_matrix)):
+            nodes[j] += demand_matrix[i][j]
+    for i in range(len(demand_matrix)):
+        pq.heappush(h, (nodes[i], i))
+    print(pq.nlargest(15, h)) """
 
 def load_demand_matrix():
     with open(DEMAND_MATRIX_PATH, 'r') as file:

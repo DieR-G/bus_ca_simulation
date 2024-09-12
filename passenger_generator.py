@@ -41,10 +41,11 @@ def generate_passengers_test(routes, stops, stations_set, passengers_at_time):
                 continue
             total_users = int(demand_matrix[i][j])
             arriving_time = 0
-            dt = math.ceil(3600/demand_matrix[i][j])
+            dt = 3600/demand_matrix[i][j]
             for k in range(total_users):
-                passengers_at_time[arriving_time] += 1
-                new_passenger = Passenger(pass_idx, arriving_time, travels[i][j][k%len(travels[i][j])], i, j)
+                passengers_at_time[int(arriving_time)] += 1
+                assert(int(arriving_time) < 3600)
+                new_passenger = Passenger(pass_idx, int(arriving_time), travels[i][j][k%len(travels[i][j])], i, j)
                 stations_set[i].add(new_passenger)
                 passenger_set.add(new_passenger)
                 arriving_time += dt

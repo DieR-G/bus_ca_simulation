@@ -24,7 +24,7 @@ bus_occupancies = []
 bus_speeds = []
 route_slowest_arc = []
 route_bus_number = []
-arc_people_count = {(i, j):[0]*MAX_TIME_SIMULATED for i, l in enumerate(network) for j, _ in l}
+#arc_people_count = {(i, j):[0]*MAX_TIME_SIMULATED for i, l in enumerate(network) for j, _ in l}
 passengers_at_time = [0] * MAX_TIME_SIMULATED
 stations = [set() for _ in range(STATION_NUMBER)]
 platforms = generate_platforms(STATION_NUMBER)
@@ -61,8 +61,8 @@ def update_bus_status(bus_routes, bus_capacities, time, passengers, on_bus, t_ti
                 route_arcs[current_arc][1] += 1
             else:
                 route_arcs[current_arc] = [bus.get_last_avg_speed(), 1]
-            if(bus.previous_state and bus.previous_state["arc"] != current_arc):
-                arc_people_count[current_arc][time] += bus_capacities[route_idx] - bus.capacity
+            #if(bus.previous_state and bus.previous_state["arc"] != current_arc):
+            #    arc_people_count[current_arc][time] += bus_capacities[route_idx] - bus.capacity
             if(bus.state == 'on_station'):
                 current_positions.append(coordinates[bus.current_node])
             else:
@@ -106,7 +106,7 @@ def run_simulation(network_routes, network_stops, network_frequencies, capacitie
         
     if save_metrics:
         save_to_csv()
-        save_flow_tables(arc_people_count, time, STATION_NUMBER)
+        #save_flow_tables(arc_people_count, time, STATION_NUMBER)
         
     print_results(time, inv_time, w_time, t_time)
     t_e = datetime.datetime.now()
@@ -127,5 +127,20 @@ network_frequencies = data_loader.load_frequencies()
 network_capacities = data_loader.load_capacities()
 
 # Run the simulation with visualization enabled
-run_simulation(network_routes, network_stops, network_frequencies, network_capacities, visualize=True, save_metrics=False)
+run_simulation(network_routes, network_stops, network_frequencies, network_capacities, visualize=True, save_metrics=True)
 #get_transfers_routes(43, 28, network_routes)
+
+#instance 5:
+#total: 7130984
+#inv, wt, tt = 2362312 4768671 0
+#buses = 268
+
+#instance 6:
+#total: 3915237
+#inv, wt, tt = 1737249 2177987 0
+#buses = 172
+
+#instance 7:
+#total: 6718203
+#inv, wt, tt = 1695982 5022220 0
+#buses = 201
