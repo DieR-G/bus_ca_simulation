@@ -94,14 +94,13 @@ class Bus:
         platform_direction = lambda x: 0 if x == 1 else 1
 
         if self.state == "on_station":
-            platforms[self.current_node][self.route_id][platform_direction(self.direction)] = ""
-
+            platforms[self.current_node][self.route_id][platform_direction(self.direction)] += 1
         arc_positions[self.get_arc()][self.lane][self.get_arc_position()] = ""
         self._move()
         
         steps_left = abs(self.index_time_list[self.route_position] - self.position)
 
-        if self.state == "on_station" and platforms[self.current_node][self.route_id][platform_direction(self.direction)] != "":
+        if self.state == "on_station" and platforms[self.current_node][self.route_id][platform_direction(self.direction)] == 0:
             self.undo_move()
             arc_positions[self.get_arc()][self.lane][self.get_arc_position()] = self.id
             return alighted_passengers, transfered_passengers, new_passengers
@@ -109,7 +108,7 @@ class Bus:
         if arc_positions[self.get_arc()][self.lane][self.get_arc_position()] != "" and self.state == 'on_road':
             self.undo_move()
             if self.state == "on_station":
-                platforms[self.current_node][self.route_id][platform_direction(self.direction)] = self.id
+                platforms[self.current_node][self.route_id][platform_direction(self.direction)] -= 1
             
             if (self.bus_ahead.current_node != self.current_node and 
                     arc_positions[self.get_arc()][1][self.get_arc_position()] == "" and
@@ -126,7 +125,7 @@ class Bus:
         
         if self.state == "on_station":
             self.lane = 0
-            platforms[self.current_node][self.route_id][platform_direction(self.direction)] = self.id
+            platforms[self.current_node][self.route_id][platform_direction(self.direction)] -= 1
             if self.node_time_map[self.position] in self.stops:
                 self.stop_time = 30
                 alighted_passengers, transfered_passengers = self.alight_passengers(stations, passengers)
