@@ -1,8 +1,7 @@
 from bus_generator import generate_buses_on_space
-from passenger_generator import generate_passengers_test
+from passenger_generator import generate_passengers, generate_passengers_test
 from platform_generator import generate_platforms
-from logger import save_state_data, save_to_csv, save_flow_tables
-from route_assignation import get_transfers_routes
+from logger import save_state_data, save_to_csv, save_arcflows
 import datetime
 import itertools
 import data_loader
@@ -16,7 +15,7 @@ arc_coordinates = arc_manager.create_arc_coordinates()
 
 # Constants
 STATION_NUMBER = len(network)
-MAX_TIME_SIMULATED = 500000
+MAX_TIME_SIMULATED = 5000000
 TRANSFER_TIME = 5 * 60
 
 bus_positions = []
@@ -24,14 +23,14 @@ bus_occupancies = []
 bus_speeds = []
 route_slowest_arc = []
 route_bus_number = []
-#arc_people_count = {(i, j):[0]*MAX_TIME_SIMULATED for i, l in enumerate(network) for j, _ in l}
+arc_people_count = {(i, j):0 for i, l in enumerate(network) for j, _ in l}
 passengers_at_time = [0] * MAX_TIME_SIMULATED
 stations = [set() for _ in range(STATION_NUMBER)]
 platforms = generate_platforms(STATION_NUMBER)
 
 def generate_entities(network_routes, network_stops, network_frequencies, capacities):
     global bus_occupancies, bus_speeds, route_bus_number, route_slowest_arc
-    passengers = generate_passengers_test(network_routes, network_stops, stations, passengers_at_time)
+    passengers = generate_passengers(network_routes, network_stops, stations, passengers_at_time)
     bus_routes = generate_buses_on_space(network_routes, network_stops, network_frequencies, capacities, arc_positions, platforms)
     passengers_pref_time = list(itertools.accumulate(passengers_at_time))
     bus_occupancies = [[] for _ in bus_routes]
@@ -61,8 +60,8 @@ def update_bus_status(bus_routes, bus_capacities, time, passengers, on_bus, t_ti
                 route_arcs[current_arc][1] += 1
             else:
                 route_arcs[current_arc] = [bus.get_last_avg_speed(), 1]
-            #if(bus.previous_state and bus.previous_state["arc"] != current_arc):
-            #    arc_people_count[current_arc][time] += bus_capacities[route_idx] - bus.capacity
+            if(bus.previous_state and bus.previous_state["arc"] != current_arc):
+                arc_people_count[current_arc] += bus_capacities[route_idx] - bus.capacity
             if(bus.state == 'on_station'):
                 current_positions.append(coordinates[bus.current_node])
             else:
@@ -95,7 +94,11 @@ def run_simulation(network_routes, network_stops, network_frequencies, capacitie
     n = len(passengers)
     inv_time, t_time, w_time, on_bus = 0, 0, 0, 0
     time = 0
-
+    total_dist = 0
+    for node in network:
+        for a,c in node:
+            total_dist += c
+    #print(total_dist//2*15)
     while len(passengers) > 0:
         on_bus, t_time = update_bus_status(bus_routes, capacities, time, passengers, on_bus, t_time)
         w_time, inv_time = update_times(passengers_pref_time, on_bus, time, n, passengers, w_time, inv_time)
@@ -106,12 +109,11 @@ def run_simulation(network_routes, network_stops, network_frequencies, capacitie
         
     if save_metrics:
         save_to_csv()
-        #save_flow_tables(arc_people_count, time, STATION_NUMBER)
+        save_arcflows(arc_people_count)
         
     print_results(time, inv_time, w_time, t_time)
     t_e = datetime.datetime.now()
     print(t_e - t_s)
-    
     if visualize:
         import visualization
         visualization.visualize_simulation(bus_positions, bus_routes, coordinates, network, bus_occupancies, bus_speeds, route_slowest_arc, skip_frames=1)

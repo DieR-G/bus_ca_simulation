@@ -28,8 +28,37 @@ class Passenger:
     
     def __hash__(self):
         return hash(self.id)
-    
+
 def generate_passengers_test(routes, stops, stations_set, passengers_at_time):
+    for i in range(len(demand_matrix)):
+        for j in range(len(demand_matrix)):
+            demand_matrix[i][j] = 0
+    demand_matrix[40][17] = 33
+    demand_matrix[17][38] = 33
+    demand_matrix[38][28] = 33
+
+    passenger_set = set()
+    travels = get_travel_routes(routes, stops)
+    pass_idx = 0
+    for i in range(len(demand_matrix)):
+        for j in range(len(demand_matrix)):
+            if len(travels[i][j]) == 0:
+                continue
+            if demand_matrix[i][j] == 0:
+                continue
+            total_users = int(demand_matrix[i][j])
+            arriving_time = 0
+            for k in range(total_users):
+                passengers_at_time[int(arriving_time)] += 1
+                assert(int(arriving_time) < 3600)
+                new_passenger = Passenger(pass_idx, int(arriving_time), travels[i][j][k%len(travels[i][j])], i, j)
+                stations_set[i].add(new_passenger)
+                passenger_set.add(new_passenger)
+                pass_idx += 1
+    
+    return passenger_set
+
+def generate_passengers(routes, stops, stations_set, passengers_at_time):
     passenger_set = set()
     travels = get_travel_routes(routes, stops)
     pass_idx = 0
