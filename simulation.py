@@ -23,7 +23,7 @@ bus_occupancies = []
 bus_speeds = []
 route_slowest_arc = []
 route_bus_number = []
-arc_people_count = {(i, j):0 for i, l in enumerate(network) for j, _ in l}
+arc_people_count = {(i, j):[] for i, l in enumerate(network) for j, _ in l}
 passengers_at_time = [0] * MAX_TIME_SIMULATED
 stations = [set() for _ in range(STATION_NUMBER)]
 platforms = generate_platforms(STATION_NUMBER)
@@ -60,8 +60,10 @@ def update_bus_status(bus_routes, bus_capacities, time, passengers, on_bus, t_ti
                 route_arcs[current_arc][1] += 1
             else:
                 route_arcs[current_arc] = [bus.get_last_avg_speed(), 1]
+                
             if(bus.previous_state and bus.previous_state["arc"] != current_arc):
-                arc_people_count[current_arc] += bus_capacities[route_idx] - bus.capacity
+                arc_people_count[current_arc].append((time, bus_capacities[route_idx] - bus.capacity))
+            
             if(bus.state == 'on_station'):
                 current_positions.append(coordinates[bus.current_node])
             else:
@@ -109,14 +111,14 @@ def run_simulation(network_routes, network_stops, network_frequencies, capacitie
         
     if save_metrics:
         save_to_csv()
-        save_arcflows(arc_people_count)
+        save_arcflows(arc_people_count, f"results/flow_data_{data_loader.INSTANCE_NAME}.csv", 24)
         
     print_results(time, inv_time, w_time, t_time)
     t_e = datetime.datetime.now()
     print(t_e - t_s)
     if visualize:
         import visualization
-        visualization.visualize_simulation(bus_positions, bus_routes, coordinates, network, bus_occupancies, bus_speeds, route_slowest_arc, skip_frames=1)
+        visualization.visualize_simulation(bus_positions, bus_routes, coordinates, network, bus_occupancies, bus_speeds, route_slowest_arc, skip_frames=10)
 
 def print_results(time, inv_time, w_time, t_time):
     print(time)

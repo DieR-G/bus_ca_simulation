@@ -42,11 +42,31 @@ def save_flow_tables(arc_data, total_simulation_time, n, interval_size = 3600, i
         df = pd.DataFrame(arc_flows)
         df.to_csv(file_name + str(i) + '.csv', index = False)
 
-def save_arcflows(arc_data, save_location = "results/flow_data.csv"):
+def get_interval_indices(val, intervals):
+    ans = []
+    for i, interval in enumerate(intervals):
+        if interval[0]*60 <= val <= interval[1]*60:
+            ans.append(i)
+    return ans
+
+def save_arcflows(arc_data, save_location = "results/flow_data.csv", interval_number=12):
     arc_list = [(key, val) for key, val in arc_data.items()]
     arc_list.sort(key=lambda x: sorted(str(x[0][0])+str(x[0][1])))
+    intervals = [(10*i, 10*i+60) for i in range(interval_number)]
     with open(save_location, 'w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(['forward_dir', 'people_forward', 'backward_dir', 'people_backward'])
-        for i in range(0,len(arc_list),2):
-            writer.writerow([arc_list[i][0], arc_list[i][1], arc_list[i+1][0], arc_list[i+1][1]])
+        header = ['arc']
+        header = header + [str(inter) for inter in intervals]
+        header = header + ['total']
+        writer.writerow(header)
+        for arc, timestamps in arc_list:
+            to_print = [arc]
+            row = [0]*(interval_number + 1)
+            for timestamp, people_count in timestamps:
+                indices = get_interval_indices(timestamp, intervals)
+                for idx in indices:
+                    row[idx] += people_count
+                row[interval_number] += people_count
+            to_print = to_print + row
+            writer.writerow(to_print)
+            

@@ -1,7 +1,8 @@
 import json
 import heapq as pq
 
-INSTANCE_PATH=  'data/instance7'
+INSTANCE_NAME = '403k_test_1'
+INSTANCE_PATH='data/instance_' + INSTANCE_NAME
 
 COORDINATES_PATH = INSTANCE_PATH + '/coordinates.json'
 DEMAND_MATRIX_PATH = INSTANCE_PATH + '/demand_matrix.json'

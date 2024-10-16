@@ -2,7 +2,7 @@ import data_loader
 
 routes = data_loader.load_routes()
 
-PLATFORM_NUMBER = 2
+PLATFORM_NUMBER = 10
 
 def generate_platforms(stations_number):
     stations = [{} for _ in range(stations_number)]

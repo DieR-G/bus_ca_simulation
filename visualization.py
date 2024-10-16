@@ -68,7 +68,7 @@ def visualize_simulation(bus_positions, bus_routes, coordinates, network, occupa
             occupancy_text.set_text(f'Route {i+1} Occupancy: {round(100*occupancies[i][frame * skip_frames])}%')
             speed_text.set_text(f'Route {i+1} Avg Speed: {speeds[i][frame * skip_frames]:.2f} km/h')
             slowest_text.set_text(f'Route {i+1} Slowest Arc:{slowest_arcs[i][frame*skip_frames][1]} at {slowest_arcs[i][frame*skip_frames][0]} km/h')
-        minutes, seconds = divmod(frame, 60)
+        minutes, seconds = divmod(frame*skip_frames, 60)
         hours, minutes = divmod(minutes, 60)
         time_text.set_text(f'Time (hh:mm:ss): {int(hours):02}:{int(minutes):02}:{int(seconds):02}')
         # Redraw stations on top
