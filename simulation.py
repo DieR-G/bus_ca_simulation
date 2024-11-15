@@ -27,7 +27,7 @@ arc_people_count = {(i, j):[] for i, l in enumerate(network) for j, _ in l}
 passengers_at_time = [0] * MAX_TIME_SIMULATED
 stations = [set() for _ in range(STATION_NUMBER)]
 platforms = generate_platforms(STATION_NUMBER)
-
+data_loader.load_platforms()
 def generate_entities(network_routes, network_stops, network_frequencies, capacities):
     global bus_occupancies, bus_speeds, route_bus_number, route_slowest_arc
     passengers = generate_passengers(network_routes, network_stops, stations, passengers_at_time)
@@ -118,7 +118,7 @@ def run_simulation(network_routes, network_stops, network_frequencies, capacitie
     print(t_e - t_s)
     if visualize:
         import visualization
-        visualization.visualize_simulation(bus_positions, bus_routes, coordinates, network, bus_occupancies, bus_speeds, route_slowest_arc, skip_frames=10)
+        visualization.visualize_simulation(bus_positions, bus_routes, coordinates, network, bus_occupancies, bus_speeds, route_slowest_arc, skip_frames=1)
 
 def print_results(time, inv_time, w_time, t_time):
     print(time)

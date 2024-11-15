@@ -1,7 +1,6 @@
 import json
-import heapq as pq
 
-INSTANCE_NAME = '403k_test_1'
+INSTANCE_NAME = '403k_q1'
 INSTANCE_PATH='data/instance_' + INSTANCE_NAME
 
 COORDINATES_PATH = INSTANCE_PATH + '/coordinates.json'
@@ -11,12 +10,15 @@ ROUTES_PATH = INSTANCE_PATH + '/routes.json'
 STOPS_PATH = INSTANCE_PATH + '/stops.json'
 FREQUENCIES_PATH = INSTANCE_PATH + '/frequencies.json'
 CAPACITIES_PATH = INSTANCE_PATH + '/capacities.json'
+PLATFORMS_PATH = INSTANCE_PATH + '/platforms.json'
+
+def load_path(path):
+    with open(path, 'r') as file:
+        val = json.load(file)
+    return val
 
 def load_coordinates():
-    with open(COORDINATES_PATH, 'r') as file:
-        coordinates = json.load(file)
-    return coordinates
-
+    return load_path(COORDINATES_PATH)
 
 """ nodes = [0] * len(demand_matrix)
     h = []
@@ -28,31 +30,22 @@ def load_coordinates():
     print(pq.nlargest(15, h)) """
 
 def load_demand_matrix():
-    with open(DEMAND_MATRIX_PATH, 'r') as file:
-        demand_matrix = json.load(file)
-    return demand_matrix
+    return load_path(DEMAND_MATRIX_PATH)
 
 def load_network():
-    with open(NETWORK_PATH, 'r') as file:
-        network = json.load(file)
-    return network    
+    return load_path(NETWORK_PATH)
 
 def load_routes():
-    with open(ROUTES_PATH, 'r') as file:
-        routes = json.load(file)
-    return routes
+    return load_path(ROUTES_PATH)
 
 def load_stops():
-    with open(STOPS_PATH, 'r') as file:
-        stops = json.load(file)
-    return stops
+    return load_path(STOPS_PATH)
 
 def load_frequencies():
-    with open(FREQUENCIES_PATH, 'r') as file:
-        frequencies = json.load(file)
-    return frequencies
+    return load_path(FREQUENCIES_PATH)
 
 def load_capacities():
-    with open(CAPACITIES_PATH, 'r') as file:
-        capacities = json.load(file)
-    return capacities
+    return load_path(CAPACITIES_PATH)
+
+def load_platforms():
+    return load_path(PLATFORMS_PATH)

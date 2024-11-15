@@ -53,6 +53,7 @@ def save_arcflows(arc_data, save_location = "results/flow_data.csv", interval_nu
     arc_list = [(key, val) for key, val in arc_data.items()]
     arc_list.sort(key=lambda x: sorted(str(x[0][0])+str(x[0][1])))
     intervals = [(10*i, 10*i+60) for i in range(interval_number)]
+    max_val = 0
     with open(save_location, 'w', newline='') as file:
         writer = csv.writer(file)
         header = ['arc']
@@ -69,4 +70,7 @@ def save_arcflows(arc_data, save_location = "results/flow_data.csv", interval_nu
                 row[interval_number] += people_count
             to_print = to_print + row
             writer.writerow(to_print)
+            aux = to_print[1:-1]
+            max_val = max(max_val, max(aux))
+    print(max_val)
             

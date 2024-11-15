@@ -26,6 +26,7 @@ class Bus:
         self.speed = 0
         self.position = 0
         self.stop_time = 0
+        self.platform_idx = -1
         self.starting_time = starting_time
         self.node_time_map = node_time_map
         self.index_time_list = index_time_list
@@ -53,6 +54,7 @@ class Bus:
             "direction": self.direction,
             "current_node": self.current_node,
             "state": self.state,
+            "platform_idx":self.platform_idx,
             "arc": self.get_arc()
         }
     
@@ -92,23 +94,27 @@ class Bus:
             self.stop_time -= 1
             return alighted_passengers, transfered_passengers, new_passengers
         platform_direction = lambda x: 0 if x == 1 else 1
-
-        if self.state == "on_station":
-            platforms[self.current_node][self.route_id][platform_direction(self.direction)] += 1
+        get_platform_idx = lambda platforms, node, route_idx, direction: next((t_idx for t_idx, (can, route_set) in enumerate(platforms[node][direction]) if can and route_idx in route_set), -1)    
+        if self.state == "on_station" and self.node_time_map[self.position] in self.stops:
+            assert self.platform_idx != -1
+            platforms[self.current_node][platform_direction(self.direction)][self.platform_idx][0] = True
+            self.platform_idx = -1
+            
         arc_positions[self.get_arc()][self.lane][self.get_arc_position()] = ""
         self._move()
-        
+        free_platform = get_platform_idx(platforms, self.current_node, self.route_id, platform_direction(self.direction))
         steps_left = abs(self.index_time_list[self.route_position] - self.position)
 
-        if self.state == "on_station" and platforms[self.current_node][self.route_id][platform_direction(self.direction)] == 0:
+        if self.state == "on_station" and self.node_time_map[self.position] in self.stops and free_platform == -1:
             self.undo_move()
             arc_positions[self.get_arc()][self.lane][self.get_arc_position()] = self.id
             return alighted_passengers, transfered_passengers, new_passengers
                 
         if arc_positions[self.get_arc()][self.lane][self.get_arc_position()] != "" and self.state == 'on_road':
             self.undo_move()
-            if self.state == "on_station":
-                platforms[self.current_node][self.route_id][platform_direction(self.direction)] -= 1
+            if self.state == "on_station" and self.node_time_map[self.position] in self.stops:
+                assert self.platform_idx != -1
+                platforms[self.current_node][platform_direction(self.direction)][self.platform_idx][0] = False
             
             if (self.bus_ahead.current_node != self.current_node and 
                     arc_positions[self.get_arc()][1][self.get_arc_position()] == "" and
@@ -126,10 +132,11 @@ class Bus:
         if self.state == "on_station":
             self.lane = 0
             if self.node_time_map[self.position] in self.stops:
-                platforms[self.current_node][self.route_id][platform_direction(self.direction)] -= 1
+                platforms[self.current_node][platform_direction(self.direction)][free_platform][0] = False
+                self.platform_idx = free_platform
                 alighted_passengers, transfered_passengers = self.alight_passengers(stations, passengers)
                 new_passengers = self.board_passengers(stations, time)
-                self.stop_time = max(10, min(alighted_passengers + new_passengers + transfered_passengers, 45))
+                self.stop_time = max(10, min(120, alighted_passengers + new_passengers + transfered_passengers))
                 return alighted_passengers, transfered_passengers, new_passengers
 
         arc_positions[self.get_arc()][self.lane][self.get_arc_position()] = self.id
@@ -145,6 +152,7 @@ class Bus:
             self.route_position = self.previous_state["route_position"]
             self.direction = self.previous_state["direction"]
             self.current_node = self.previous_state["current_node"]
+            self.platform_idx = self.previous_state["platform_idx"]
             self.state = self.previous_state["state"]
         else:
             print("No move to undo")

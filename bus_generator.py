@@ -34,6 +34,13 @@ def delay_bus(bus):
     bus.starting_time %= 2*bus.total_time
     bus._set_position_at_time()
 
+def free_platform_idx(platforms, node, route_idx, direction):
+    idx = -1
+    for t_idx, (can, route_set) in enumerate(platforms[node][direction]):
+        if can and route_idx in route_set:
+            return t_idx
+    return idx
+
 def generate_buses_on_space(routes, stops, frequencies, capacities, arcs, platforms):
     buses = [[] for _ in range(len(routes))]
     total_buses = 0
@@ -50,16 +57,21 @@ def generate_buses_on_space(routes, stops, frequencies, capacities, arcs, platfo
             current_pos = new_bus.get_arc_position()
             lane = new_bus.lane
             delay = 0
-            while(arcs[current_arc][lane][current_pos] != "" or (new_bus.state == 'on_station' and platforms[new_bus.current_node][new_bus.route_id] != "")):
+            
+            platform_direction = lambda x: 0 if x == 1 else 1
+
+            platform_idx = lambda platforms, node, route_idx, direction: next((t_idx for t_idx, (can, route_set) in enumerate(platforms[node][direction]) if can and route_idx in route_set), -1)    
+            bus_platform_idx = platform_idx(platforms, new_bus.current_node, new_bus.route_id, platform_direction(new_bus.direction))
+            while(arcs[current_arc][lane][current_pos] != "" or (new_bus.state == 'on_station' and bus_platform_idx == -1)):
                 delay += 1
                 new_bus = bus_factory.create_bus(str(k) + str(i), capacities[k], start_time - delay)
                 current_arc = new_bus.get_arc()
                 current_pos = new_bus.get_arc_position()
-            
-            platform_direction = lambda x: 0 if x == 1 else 1
-            
+                bus_platform_idx = platform_idx(platforms, new_bus.current_node, new_bus.route_id, platform_direction(new_bus.direction))
+                        
             if new_bus.state == 'on_station':
-                platforms[new_bus.current_node][new_bus.route_id][platform_direction(new_bus.direction)] = new_bus.id
+                platforms[new_bus.current_node][platform_direction(new_bus.direction)][bus_platform_idx][0] = False
+                new_bus.platform_idx = bus_platform_idx
                 
             arcs[current_arc][lane][current_pos] = new_bus.id
             buses[k].append(new_bus)
