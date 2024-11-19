@@ -80,5 +80,5 @@ def generate_buses_on_space(routes, stops, frequencies, capacities, arcs, platfo
         
         for j in range(len(buses[k])):
             buses[k][j].bus_ahead = buses[k][(j+1)%len(buses[k])]
-    print(f"Total buses: {total_buses}")
+    #print(f"Total buses: {total_buses}")
     return buses

@@ -1,6 +1,6 @@
 import json
 
-INSTANCE_NAME = '403k_q1'
+INSTANCE_NAME = '403k_q2'
 INSTANCE_PATH='data/instance_' + INSTANCE_NAME
 
 COORDINATES_PATH = INSTANCE_PATH + '/coordinates.json'

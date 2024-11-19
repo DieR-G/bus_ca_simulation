@@ -49,7 +49,7 @@ def get_interval_indices(val, intervals):
             ans.append(i)
     return ans
 
-def save_arcflows(arc_data, save_location = "results/flow_data.csv", interval_number=12):
+def save_arcflows(arc_data, save_location = "results/flow_data.csv", interval_number=15):
     arc_list = [(key, val) for key, val in arc_data.items()]
     arc_list.sort(key=lambda x: sorted(str(x[0][0])+str(x[0][1])))
     intervals = [(10*i, 10*i+60) for i in range(interval_number)]
@@ -73,4 +73,21 @@ def save_arcflows(arc_data, save_location = "results/flow_data.csv", interval_nu
             aux = to_print[1:-1]
             max_val = max(max_val, max(aux))
     print(max_val)
-            
+
+def get_max_arcflow(arc_data, interval_number = 15):
+    arc_list = [(key, val) for key, val in arc_data.items()]
+    arc_list.sort(key=lambda x: sorted(str(x[0][0])+str(x[0][1])))
+    intervals = [(10*i, 10*i+60) for i in range(interval_number)]
+    max_val = 0
+    for arc, timestamps in arc_list:
+        to_print = [arc]
+        row = [0]*(interval_number + 1)
+        for timestamp, people_count in timestamps:
+            indices = get_interval_indices(timestamp, intervals)
+            for idx in indices:
+                row[idx] += people_count
+            row[interval_number] += people_count
+        to_print = to_print + row
+        aux = to_print[1:-1]
+        max_val = max(max_val, max(aux))
+    return max_val

@@ -1,7 +1,7 @@
 from bus_generator import generate_buses_on_space
 from passenger_generator import generate_passengers, generate_passengers_test
 from platform_generator import generate_platforms
-from logger import save_state_data, save_to_csv, save_arcflows
+from logger import save_state_data, save_to_csv, save_arcflows, get_max_arcflow
 import datetime
 import itertools
 import data_loader
@@ -120,6 +120,21 @@ def run_simulation(network_routes, network_stops, network_frequencies, capacitie
         import visualization
         visualization.visualize_simulation(bus_positions, bus_routes, coordinates, network, bus_occupancies, bus_speeds, route_slowest_arc, skip_frames=1)
 
+def evaluate(network_routes, network_stops, network_frequencies, capacities):
+    passengers, bus_routes, passengers_pref_time = generate_entities(network_routes, network_stops, network_frequencies, capacities)
+    n = len(passengers)
+    inv_time, t_time, w_time, on_bus = 0, 0, 0, 0
+    time = 0
+    while len(passengers) > 0:
+        on_bus, t_time = update_bus_status(bus_routes, capacities, time, passengers, on_bus, t_time)
+        w_time, inv_time = update_times(passengers_pref_time, on_bus, time, n, passengers, w_time, inv_time)
+        time += 1
+    inv_time //= 60
+    w_time //= 60
+    t_time //= 60
+    total_time = inv_time + w_time + t_time
+    return time, inv_time, w_time, t_time, total_time, get_max_arcflow(arc_people_count, 24)
+
 def print_results(time, inv_time, w_time, t_time):
     print(time)
     print(inv_time // 60, w_time // 60, t_time // 60, (inv_time + w_time + t_time) // 60)
@@ -131,7 +146,8 @@ network_frequencies = data_loader.load_frequencies()
 network_capacities = data_loader.load_capacities()
 
 # Run the simulation with visualization enabled
-run_simulation(network_routes, network_stops, network_frequencies, network_capacities, visualize=True, save_metrics=True)
+#run_simulation(network_routes, network_stops, network_frequencies, network_capacities, visualize=True, save_metrics=True)
+print(evaluate(network_routes, network_stops, network_frequencies, network_capacities))
 #get_transfers_routes(43, 28, network_routes)
 
 #instance 5:
