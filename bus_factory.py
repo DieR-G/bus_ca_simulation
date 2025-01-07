@@ -1,5 +1,5 @@
-from bus_class import Bus
-from route_assignation import compute_time
+from .bus_class import Bus
+from .route_assignation import compute_time
 
 class BusFactory:
     def __init__(self, network, route, stops, route_id):

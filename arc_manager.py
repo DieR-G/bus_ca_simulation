@@ -1,8 +1,8 @@
 import numpy as np
-import data_loader
+from .data_loader import load_coordinates, load_network
 
-coordinates = data_loader.load_coordinates()
-network = data_loader.load_network()
+coordinates = load_coordinates()
+network = load_network()
 x_values = [c[0] for c in coordinates]
 y_values = [c[1] for c in coordinates]
 range_vec = np.array([max(x_values) - min(x_values), max(y_values) - min(y_values)])

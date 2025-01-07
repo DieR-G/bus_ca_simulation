@@ -1,8 +1,8 @@
-from route_assignation import get_travel_routes
-import data_loader
+from .route_assignation import get_travel_routes
+from .data_loader import load_network
 import json
 
-network = data_loader.load_network()
+network = load_network()
 
 def floyd_warshall(n):
     mat = [[int(1e10) for _ in range(n)] for _ in range(n)]

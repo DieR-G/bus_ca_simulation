@@ -1,8 +1,8 @@
-from route_assignation import get_travel_routes
-import data_loader
+from .route_assignation import get_travel_routes
+from .data_loader import load_demand_matrix
 import math
 
-demand_matrix = data_loader.load_demand_matrix()
+demand_matrix = load_demand_matrix()
 
 start_time_matrix = []
 

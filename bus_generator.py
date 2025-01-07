@@ -1,8 +1,8 @@
-from bus_factory import BusFactory
+from .bus_factory import BusFactory
 import math
-import data_loader
+from .data_loader import load_network
 
-network = data_loader.load_network()
+network = load_network()
 
 def generate_buses(routes, frequencies, capacity):
     buses = [[] for _ in range(len(routes))]
@@ -41,16 +41,16 @@ def free_platform_idx(platforms, node, route_idx, direction):
             return t_idx
     return idx
 
-def generate_buses_on_space(routes, stops, frequencies, capacities, arcs, platforms):
+def generate_buses_on_space(routes, stops, bus_numbers, capacities, arcs, platforms):
     buses = [[] for _ in range(len(routes))]
     total_buses = 0
     for k in range(len(routes)):
         bus_factory = BusFactory(network, routes[k], stops[k], k)
-        bus_number = math.ceil(frequencies[k] * bus_factory.total_time / (60*30))
-        total_buses += bus_number
-        time_delta = math.ceil(3600 / frequencies[k])
+        total_buses += bus_numbers[k]
+        frequency = 30*60*bus_numbers[k]/bus_factory.total_time
+        time_delta = math.ceil(3600 / frequency)
         start_time = 0
-        for i in range(bus_number):
+        for i in range(bus_numbers[k]):
             new_bus = bus_factory.create_bus(str(k) + str(i),
                                              capacities[k], start_time)
             current_arc = new_bus.get_arc()
